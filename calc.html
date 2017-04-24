@@ -15,16 +15,14 @@ function prime_test(a)
     var i; var to; to = Math.sqrt(a);
     if (a==2 || a==3 || a==5) return true;
     if (((a % 2) == 0) || ((a % 3) == 0) || ((a % 5) == 0)) return false;
-    for (i=6; i<=(to+1); i=i+6) { if ((a%(i-1))==0||(a%(i+1))==0) return false; }
+    for (i=6; i<=(to+6); i=i+6) { if ((a%(i-1))==0||(a%(i+1))==0) return false; }
     return true;
 }
 
 var score = 0;
-var memory = 0;
 var memory_string = '...';
-var plus = '+';
-var minus = '-';
-var donothing = 'no';
+var first_time_flag='y';
+var reset_flag = 'n';
 
 var buttonStyle = {
     display: 'inline-flex',	alignItems: 'center', justifyContent: 'center',
@@ -35,6 +33,12 @@ var buttonStyle = {
 var buttonStyleC = {
     display: 'inline-flex',	alignItems: 'center', justifyContent: 'center',
 	width: '40px', height: '40px',	backgroundColor: '#e6eeff',
+    color: 'black', border: '1px solid #007399', 
+    };
+
+var buttonStyleF = {
+    display: 'inline-flex',	alignItems: 'center', justifyContent: 'center',
+	width: '40px', height: '40px',	backgroundColor: '#EFEFEF',
     color: 'black', border: '1px solid #007399', 
     };
 
@@ -53,55 +57,58 @@ var displayStyle2 = {
 var Calculator = React.createClass({
     
         //
-        // HANDLE COMPONENT CHANGE + CALC LOGIC
+        // HANDLE COMPONENT CHANGE and CALC LOGIC 
         //
         
         handleChange: function (e) {
-  	    var myvalue;
-        var x;
-        var y = e.target.value;      
+  	    var x; 
+        var myvalue;
+        var y = e.target.value;   
+        var operator = 'null';  
+        var donothing = 'n'; 
+        
         
         if (y=='0'||y=='1'||y=='2'||y=='3'||y=='4'||y=='5'||y=='6'||y=='7'||y=='8'||y=='9'){ x=parseInt(y); }
-
-        if (y == "cancel") { score=0; x=0; memory=0; memory_string='...'; }
-                        
-        if (y == "+") {
-            if (memory > 0) {
-                x = memory + score;
-                score = 0;
-                memory_string = plus.concat(memory.toString());
-            }
-            else {
-                memory = score; 
-                score = 0;
-                x = 0;
-                memory_string = plus.concat(memory.toString());
-                }
-        } 
+        if (y == 'cancel') { score=0; x=0; memory_string='...'; first_time_flag = 'y'; }
+        if (y=='+'||y=='-'||y=='%'||y=='*'||y=='='||y=='('||y==')'||y=='^') { operator = y; }
+      
+        if (reset_flag == 'y') { score=0; x=0; memory_string='...'; first_time_flag = 'y'; reset_flag = 'n'; donothing = 'y';}
 
         if (y == "pm") { 
-            if (score==1) { memory_string="1 is not a prime"; donothing='yes';}
-            else { prime_test(score)?memory_string="prime":memory_string="composite"; donothing='yes'; }    
+            if (score==1) { memory_string="1 is not a prime";}
+            else { prime_test(score)?memory_string="prime":memory_string="composite";}
+            donothing = 'y';    
         }
-          
-        // DIGITS HERE
-        if (score == 0 ){ myvalue = x; }
-        else { 
-              if (donothing == 'yes'){myvalue = score; donothing = 'no';}  
-              else {myvalue = (score*10) + x ;}
+
+        if ((operator!='null') && (operator!='=')) {
+            if (first_time_flag == 'y'){ memory_string = score + operator; }
+            if (first_time_flag != 'y'){ memory_string = memory_string + score + operator; }
+            score = 0; x=0; operator='null';
+            first_time_flag = 'n';
         }
-  	    score = myvalue;          
-        
+
+        if (operator == '=') {
+            memory_string = memory_string + score;
+            try { score = eval(memory_string); } catch(err) { score = 'ERROR'; }
+            donothing = 'y'; first_time_flag = 'y'; reset_flag = 'y';
+        }
+
+        // DIGIT LOGIC
+        if (donothing == 'n'){        
+            if (score == 0 ){ score = x; }
+            else {score = score*10 + x ;}
+        }
+          	    
         console.log('---------------------------------');
         console.log('onClick value=' + y);
         console.log('score=' + score);
-        console.log('memory=' + memory);
         console.log('memory_string=' + memory_string);
 
+        myvalue=score;
         this.props.onChange(myvalue);
         },
 
-        // HANDLE CHANGE & CALC LOGIC function --- END
+        // HANDLE COMPONENT CHANGE and CALC LOGIC --- END
   
         render: function () {
         return (
@@ -113,21 +120,25 @@ var Calculator = React.createClass({
                 <h1 style={displayStyle}>
                     {this.props.myvalue}
                 </h1><br />
-                <button type="button" style={buttonStyle} value="pm" onClick= {this.handleChange}> pm </button>
+                <button type="button" style={buttonStyleF} value="pm" onClick= {this.handleChange}> pm </button>
                 <button type="button" style={buttonStyle} value="1" onClick= {this.handleChange}> 1 </button>
                 <button type="button" style={buttonStyle} value="2" onClick= {this.handleChange}> 2 </button>
                 <button type="button" style={buttonStyle} value="3" onClick= {this.handleChange}> 3 </button><br />
-                <button type="button" style={buttonStyle} value="1" onClick= {this.handleChange}> - </button>
+                <button type="button" style={buttonStyleF} value="-" onClick= {this.handleChange}> - </button>
                 <button type="button" style={buttonStyle} value="4" onClick= {this.handleChange}> 4 </button>
                 <button type="button" style={buttonStyle} value="5" onClick= {this.handleChange}> 5 </button>
                 <button type="button" style={buttonStyle} value="6" onClick= {this.handleChange}> 6 </button><br />
-                <button type="button" style={buttonStyle} value="7" onClick= {this.handleChange}> x </button>
+                <button type="button" style={buttonStyleF} value="*" onClick= {this.handleChange}> * </button>
                 <button type="button" style={buttonStyle} value="7" onClick= {this.handleChange}> 7 </button>
                 <button type="button" style={buttonStyle} value="8" onClick= {this.handleChange}> 8 </button>
                 <button type="button" style={buttonStyle} value="9" onClick= {this.handleChange}> 9 </button><br />
-                <button type="button" style={buttonStyle} value="+" onClick= {this.handleChange}> % </button>
-                <button type="button" style={buttonStyle} value="+" onClick= {this.handleChange}> + </button>
+                <button type="button" style={buttonStyleF} value="%" onClick= {this.handleChange}> % </button>
+                <button type="button" style={buttonStyleF} value="+" onClick= {this.handleChange}> + </button>
                 <button type="button" style={buttonStyle} value="0" onClick= {this.handleChange}> 0 </button>
+                <button type="button" style={buttonStyleF} value="=" onClick= {this.handleChange}> = </button><br />
+                <button type="button" style={buttonStyleF} value="(" onClick= {this.handleChange}> ( </button>
+                <button type="button" style={buttonStyleF} value=")" onClick= {this.handleChange}> ) </button>
+                <button type="button" style={buttonStyleF} value="^" onClick= {this.handleChange}> ^ </button>
                 <button type="button" style={buttonStyleC} value="cancel" onClick= {this.handleChange}> C </button>
             </div>
         );
