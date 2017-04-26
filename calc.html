@@ -1,12 +1,10 @@
 <!DOCTYPE HTML>
-<html><head><meta charset="utf-8"><title>PxCALCULATOR v1.0</title></head>
-<body>
-    
-<div id="myDiv" align="center"></div>
+<html><head><meta charset="utf-8"><title>pmcalc</title></head>
+<body style="margin:0; padding:0"><div id="myDiv" align="center"></div>
 
-<script src="https://fb.me/react-15.0.1.js"></script>
-<script src="https://fb.me/react-dom-15.0.1.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.23/browser.min.js"></script>   
+<script src="./_react.js"></script>
+<script src="./_react-dom.js"></script>
+<script src="./_browser.min.js"></script>   
 <script type="text/babel">  
 
 // prime_test FUNCTION - some kind of brute force prime test with small optimization
@@ -19,10 +17,9 @@ function prime_test(a)
     return true;
 }
 
-var score = 0;
+var initialvalue = '0';
+var myvalue = '0';
 var memory_string = '...';
-var first_time_flag='y';
-var reset_flag = 'n';
 
 var buttonStyle = {
     display: 'inline-flex',	alignItems: 'center', justifyContent: 'center',
@@ -32,7 +29,7 @@ var buttonStyle = {
 
 var buttonStyleC = {
     display: 'inline-flex',	alignItems: 'center', justifyContent: 'center',
-	width: '40px', height: '40px',	backgroundColor: '#e6eeff',
+	width: '40px', height: '40px',	backgroundColor: '#80bfff',
     color: 'black', border: '1px solid #007399', 
     };
 
@@ -44,15 +41,17 @@ var buttonStyleF = {
 
 var displayStyle = {
     display: 'inline-flex',	alignItems: 'center', justifyContent: 'flex-end',
-	width: '156px',	height: '40px',	margin: '0px', padding: '2px',
+	width: '196px',	height: '40px',	margin: '0px', padding: '2px',
 	fontFamily: 'courier', fontSize: '16px', backgroundColor: '#007399', color: 'white',
     };
 
 var displayStyle2 = {
     display: 'inline-flex',	alignItems: 'center', justifyContent: 'flex-end', 
-    width: '156px',	height: '16px',	margin: '0px', padding: '2px', 
+    width: '196px',	height: '16px',	margin: '0px', padding: '2px', 
     fontFamily: 'courier', fontSize: '11px', backgroundColor: '#007399', color: 'white',
     };
+
+var displayStyleMain = {margin: '0px', padding: '0px',};
 
 var Calculator = React.createClass({
     
@@ -61,50 +60,38 @@ var Calculator = React.createClass({
         //
         
         handleChange: function (e) {
-  	    var x; 
-        var myvalue;
-        var y = e.target.value;   
-        var operator = 'null';  
-        var donothing = 'n'; 
-        
-        
-        if (y=='0'||y=='1'||y=='2'||y=='3'||y=='4'||y=='5'||y=='6'||y=='7'||y=='8'||y=='9'){ x=parseInt(y); }
-        if (y == 'cancel') { score=0; x=0; memory_string='...'; first_time_flag = 'y'; }
-        if (y=='+'||y=='-'||y=='%'||y=='*'||y=='='||y=='('||y==')'||y=='^') { operator = y; }
-      
-        if (reset_flag == 'y') { score=0; x=0; memory_string='...'; first_time_flag = 'y'; reset_flag = 'n'; donothing = 'y';}
+  	    var x;
+        var len;
+        var y = e.target.value;
+        var tmp_myvalue = myvalue;                  
+
+        if (y == 'cancel') { myvalue='0'; memory_string='...';}
+
+        if (myvalue == '0' && y!='cancel' && y!='pm' && y!='=') {myvalue = y;}
+        else if (y!='cancel' && y!='pm' && y!='=') {myvalue = myvalue + y;}
 
         if (y == "pm") { 
-            if (score==1) { memory_string="1 is not a prime";}
-            else { prime_test(score)?memory_string="prime":memory_string="composite";}
-            donothing = 'y';    
+            if (myvalue=='1') { memory_string="1 is not a prime";}
+            else { 
+                if (isNaN(myvalue)) { memory_string = 'ERROR'; }
+                else { memory_string = prime_test(myvalue)?myvalue + " is prime":myvalue + " is composite"; }
+            }
         }
 
-        if ((operator!='null') && (operator!='=')) {
-            if (first_time_flag == 'y'){ memory_string = score + operator; }
-            if (first_time_flag != 'y'){ memory_string = memory_string + score + operator; }
-            score = 0; x=0; operator='null';
-            first_time_flag = 'n';
+        if (y == '=') {
+            try { memory_string = eval(myvalue); } catch(err) { memory_string = 'ERROR'; }
         }
 
-        if (operator == '=') {
-            memory_string = memory_string + score;
-            try { score = eval(memory_string); } catch(err) { score = 'ERROR'; }
-            donothing = 'y'; first_time_flag = 'y'; reset_flag = 'y';
-        }
+        len = myvalue.length;
+        if (len > 20) {myvalue = tmp_myvalue;} 
 
-        // DIGIT LOGIC
-        if (donothing == 'n'){        
-            if (score == 0 ){ score = x; }
-            else {score = score*10 + x ;}
-        }
-          	    
         console.log('---------------------------------');
         console.log('onClick value=' + y);
-        console.log('score=' + score);
+        console.log('x value=' + x);
+        console.log('myvalue=' + myvalue);
         console.log('memory_string=' + memory_string);
+        console.log('len=' + len);
 
-        myvalue=score;
         this.props.onChange(myvalue);
         },
 
@@ -112,34 +99,33 @@ var Calculator = React.createClass({
   
         render: function () {
         return (
-            <div>
-                <br />
+            <div style={displayStyleMain}>
                 <h1 style={displayStyle2}>
                     {memory_string}
                 </h1><br />
                 <h1 style={displayStyle}>
                     {this.props.myvalue}
                 </h1><br />
+                <button type="button" style={buttonStyleC} value="cancel" onClick= {this.handleChange}> C </button>
                 <button type="button" style={buttonStyleF} value="pm" onClick= {this.handleChange}> pm </button>
                 <button type="button" style={buttonStyle} value="1" onClick= {this.handleChange}> 1 </button>
                 <button type="button" style={buttonStyle} value="2" onClick= {this.handleChange}> 2 </button>
                 <button type="button" style={buttonStyle} value="3" onClick= {this.handleChange}> 3 </button><br />
+                <button type="button" style={buttonStyleF} value=")" onClick= {this.handleChange}> ) </button>
                 <button type="button" style={buttonStyleF} value="-" onClick= {this.handleChange}> - </button>
                 <button type="button" style={buttonStyle} value="4" onClick= {this.handleChange}> 4 </button>
                 <button type="button" style={buttonStyle} value="5" onClick= {this.handleChange}> 5 </button>
                 <button type="button" style={buttonStyle} value="6" onClick= {this.handleChange}> 6 </button><br />
+                 <button type="button" style={buttonStyleF} value="(" onClick= {this.handleChange}> ( </button>
                 <button type="button" style={buttonStyleF} value="*" onClick= {this.handleChange}> * </button>
                 <button type="button" style={buttonStyle} value="7" onClick= {this.handleChange}> 7 </button>
                 <button type="button" style={buttonStyle} value="8" onClick= {this.handleChange}> 8 </button>
                 <button type="button" style={buttonStyle} value="9" onClick= {this.handleChange}> 9 </button><br />
-                <button type="button" style={buttonStyleF} value="%" onClick= {this.handleChange}> % </button>
+                <button type="button" style={buttonStyleF} value="**" onClick= {this.handleChange}> ** </button>
+                <button type="button" style={buttonStyleF} value="/" onClick= {this.handleChange}> / </button>
                 <button type="button" style={buttonStyleF} value="+" onClick= {this.handleChange}> + </button>
                 <button type="button" style={buttonStyle} value="0" onClick= {this.handleChange}> 0 </button>
                 <button type="button" style={buttonStyleF} value="=" onClick= {this.handleChange}> = </button><br />
-                <button type="button" style={buttonStyleF} value="(" onClick= {this.handleChange}> ( </button>
-                <button type="button" style={buttonStyleF} value=")" onClick= {this.handleChange}> ) </button>
-                <button type="button" style={buttonStyleF} value="^" onClick= {this.handleChange}> ^ </button>
-                <button type="button" style={buttonStyleC} value="cancel" onClick= {this.handleChange}> C </button>
             </div>
         );
         }
@@ -148,7 +134,7 @@ var Calculator = React.createClass({
  
 var MainCNT = React.createClass({
         getInitialState: function () {
-        return { myvalue: score  };
+        return { myvalue: initialvalue };
     },
 
     FOperation: function (newmyvalue) {
@@ -165,6 +151,4 @@ var MainCNT = React.createClass({
 
 ReactDOM.render(<MainCNT />,document.getElementById('myDiv'));
 
-    </script>
-  </body>
-</html>
+</script></body></html>
