@@ -1,1 +1,1 @@
-# Calculator with prime test. React + JS + Electron.
+Calculator with prime test. React + JS + Electron.
