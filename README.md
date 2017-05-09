@@ -1,1 +1,1 @@
-# Some React & JS works
+# Calculator with prime test. React + JS + Electron.
