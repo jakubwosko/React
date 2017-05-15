@@ -2,10 +2,8 @@
 
 Calculator with prime test. React + JS + Electron.
 
-React & Babel libraries are locally copied to files: 
+To compile it yourself you need React & Babel libraries locally.
 
-<script src="./_react.js"></script>
-<script src="./_react-dom.js"></script>
-<script src="./_browser.min.js"></script>
+![Alt text](https://github.com/jakubwosko/pmCalc/blob/master/Untitled1.1.png "pmcalc")
 
 
