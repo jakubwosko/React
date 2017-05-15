@@ -1,6 +1,8 @@
-#pmcalc 1.1
+*** pmcalc 1.1 ***
 
-Calculator with prime test. React + JS + Electron.
+PmCalc is calculator with prime test function (PM). 
+
+Calculator is written in JavaScript, React and Electron framework.
 
 To compile it yourself you need React & Babel libraries locally.
 
