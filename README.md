@@ -10,7 +10,7 @@ To build the application yourself for Windows:
 - install Electron
 - download all files
 - download React, ReactDOM, Babel (name them _react.js, _react-dom.js, _browser.min.js)
-- run from command line in application directory: electron-packager ./ pmcalc --platform=win32
+- run from command line (in your application directory): electron-packager ./ pmcalc --platform=win32
 
 
 
